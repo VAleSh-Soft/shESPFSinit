@@ -48,6 +48,8 @@ private:
 #ifndef ESP_FS_INIT_LOG_OFF
   bool logOnState = true;
   Print *serial = &Serial;
+  
+  void printResult(bool result);
 #endif
 
   bool fs_check();

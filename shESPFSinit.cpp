@@ -64,8 +64,7 @@ bool shESPFSinit::init()
   EFI_PRINT(FPSTR(FS_INIT));
   bool result = ESP_FILESYSTEM.begin();
 
-  String res = (result) ? FPSTR(OK_STR) : FPSTR(FAILED_STR);
-  EFI_PRINTLN(res);
+  printResult(result);
 
   if (result)
   {
@@ -108,6 +107,14 @@ bool shESPFSinit::getLogOnState() { return logOnState; }
 #endif
 // ==== private ======================================
 
+#ifndef ESP_FS_INIT_LOG_OFF
+void shESPFSinit::printResult(bool result)
+{
+  String res = (result) ? FPSTR(OK_STR) : FPSTR(FAILED_STR);
+  EFI_PRINTLN(res);
+}
+#endif
+
 bool shESPFSinit::fs_check()
 {
   bool result = ESP_FILESYSTEM.exists(labelFileName);
@@ -115,16 +122,14 @@ bool shESPFSinit::fs_check()
   {
     EFI_PRINT(FPSTR(WRITE_LABEL));
     result = writeLabel(labelFileName);
-    String res = (result) ? FPSTR(OK_STR) : FPSTR(FAILED_STR);
-    EFI_PRINTLN(res);
+    printResult(result);
   }
   else
   {
     EFI_PRINT(FPSTR(CHECKING_FS_LAB));
     String x = readLabel(labelFileName);
     result = (x == fsName);
-    String res = (result) ? FPSTR(OK_STR) : FPSTR(FAILED_STR);
-    EFI_PRINTLN(res);
+    printResult(result);
   }
 
   return (result);
@@ -135,8 +140,7 @@ bool shESPFSinit::fs_format()
   EFI_PRINT(FPSTR(FORMATTING_FS));
   ESP_FILESYSTEM.end();
   bool result = ESP_FILESYSTEM.format();
-  String res = (result) ? FPSTR(OK_STR) : FPSTR(FAILED_STR);
-  EFI_PRINTLN(res);
+    printResult(result);
 #if defined(ARDUINO_ARCH_ESP32)
   if (result)
   {
