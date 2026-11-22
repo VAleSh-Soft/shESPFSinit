@@ -1,0 +1,25 @@
+#######################################
+# Syntax Coloring Map For shESPFSinit
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+shESPFSinit	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2) 
+#######################################
+
+init	KEYWORD2
+setLabelFileName	KEYWORD2
+getLabelFileName	KEYWORD2
+setLogOnState	KEYWORD2
+getLogOnState	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+ESP_FILESYSTEM	LITERAL1
