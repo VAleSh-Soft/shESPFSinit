@@ -43,24 +43,46 @@
 class shESPFSinit
 {
 private:
-  const char *labelFileName = "/fs";
+  String labelFileName = "/fs";
   String fsName;
 #ifndef ESP_FS_INIT_LOG_OFF
   bool logOnState = true;
   Print *serial = &Serial;
+#endif
   
   void printResult(bool result);
-#endif
-
   bool fs_check();
   bool fs_format();
   bool writeLabel(const char *_path);
   String readLabel(const char *path);
 
 public:
+  /**
+   * @brief конструктор
+   * 
+   */
   shESPFSinit();
+
+  /**
+   * @brief инициализация файловой системы
+   * 
+   * @return true 
+   * @return false 
+   */
   bool init();
+
+  /**
+   * @brief установка нового имени файловой метки (по умолчанию "/fs")
+   * 
+   * @param _path новое имя файла
+   */
   void setLabelFileName(const char *_path);
+
+  /**
+   * @brief получение текущего имени файловой метки
+   * 
+   * @return String 
+   */
   String getLabelFileName();
 
 #ifndef ESP_FS_INIT_LOG_OFF

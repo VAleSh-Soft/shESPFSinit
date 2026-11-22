@@ -31,7 +31,6 @@ static const char FS_NAME[] PROGMEM = "File system - ";
 static const char UNKN_FS[] PROGMEM = "Unsupported file system specified";
 static const char NO_WRITE[] PROGMEM = " - failed to open file for writing";
 static const char NO_READ[] PROGMEM = " - failed to open file for reading";
-static const char TOO_LARGE[] PROGMEM = " - too large (max 4096 bytes)";
 static const char RESTART[] PROGMEM = "The module will restart now";
 static const char FAILED_STR[] PROGMEM = "failed";
 static const char OK_STR[] PROGMEM = "OK";
@@ -91,10 +90,15 @@ bool shESPFSinit::init()
 
 void shESPFSinit::setLabelFileName(const char *_path)
 {
-  labelFileName = _path;
+  // копируем строку во избежание висячего указателя
+  labelFileName = String(_path ? _path : "/fs");
+  if (labelFileName.indexOf("/") != 0)
+  {
+    labelFileName = "/" + labelFileName;
+  }
 }
 
-String shESPFSinit::getLabelFileName() { return String(labelFileName); }
+String shESPFSinit::getLabelFileName() { return labelFileName; }
 
 #ifndef ESP_FS_INIT_LOG_OFF
 void shESPFSinit::setLogOnState(bool _on, Print *_serial)
@@ -107,13 +111,13 @@ bool shESPFSinit::getLogOnState() { return logOnState; }
 #endif
 // ==== private ======================================
 
-#ifndef ESP_FS_INIT_LOG_OFF
 void shESPFSinit::printResult(bool result)
 {
+#ifndef ESP_FS_INIT_LOG_OFF
   String res = (result) ? FPSTR(OK_STR) : FPSTR(FAILED_STR);
   EFI_PRINTLN(res);
-}
 #endif
+}
 
 bool shESPFSinit::fs_check()
 {
@@ -121,13 +125,13 @@ bool shESPFSinit::fs_check()
   if (!result)
   {
     EFI_PRINT(FPSTR(WRITE_LABEL));
-    result = writeLabel(labelFileName);
+    result = writeLabel(labelFileName.c_str());
     printResult(result);
   }
   else
   {
     EFI_PRINT(FPSTR(CHECKING_FS_LAB));
-    String x = readLabel(labelFileName);
+    String x = readLabel(labelFileName.c_str());
     result = (x == fsName);
     printResult(result);
   }
@@ -140,7 +144,7 @@ bool shESPFSinit::fs_format()
   EFI_PRINT(FPSTR(FORMATTING_FS));
   ESP_FILESYSTEM.end();
   bool result = ESP_FILESYSTEM.format();
-    printResult(result);
+  printResult(result);
 #if defined(ARDUINO_ARCH_ESP32)
   if (result)
   {
@@ -190,20 +194,25 @@ String shESPFSinit::readLabel(const char *path)
     {
       file.close();
     }
-    return (emptyString);
+    return (String());
   }
 
-  size_t _size = file.size();
-  if (_size > 4096)
+  // метка короткая - читаем не более 16 байт
+  char buf[17];
+  int len = file.readBytes(buf, sizeof(buf) - 1);
+  if (len < 0)
   {
-    EFI_PRINT(path);
-    EFI_PRINTLN(FPSTR(TOO_LARGE));
-    file.close();
-    return (emptyString);
+    len = 0;
   }
-
-  String content = file.readString();
+  buf[len] = '\0';
   file.close();
 
-  return (content);
+  // обрезаем по первому пробельному символу
+  char *p = strpbrk(buf, " \n\r\t");
+  if (p)
+  {
+    *p = '\0';
+  }
+
+  return (String(buf));
 }
