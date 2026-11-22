@@ -17,6 +17,7 @@ setLabelFileName	KEYWORD2
 getLabelFileName	KEYWORD2
 setLogOnState	KEYWORD2
 getLogOnState	KEYWORD2
+setSerialObject	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

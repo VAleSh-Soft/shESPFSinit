@@ -37,15 +37,7 @@ static const char OK_STR[] PROGMEM = "OK";
 
 // ==== public =======================================
 
-shESPFSinit::shESPFSinit()
-{
-#ifndef ESP_FS_INIT_LOG_OFF
-  if (Serial)
-  {
-    serial = &Serial;
-  }
-#endif
-}
+shESPFSinit::shESPFSinit() {}
 
 bool shESPFSinit::init()
 {
@@ -92,7 +84,7 @@ void shESPFSinit::setLabelFileName(const char *_path)
 {
   // копируем строку во избежание висячего указателя
   labelFileName = String(_path ? _path : "/fs");
-  if (labelFileName.indexOf("/") != 0)
+  if (labelFileName[0] != '/')
   {
     labelFileName = "/" + labelFileName;
   }
@@ -101,10 +93,17 @@ void shESPFSinit::setLabelFileName(const char *_path)
 String shESPFSinit::getLabelFileName() { return labelFileName; }
 
 #ifndef ESP_FS_INIT_LOG_OFF
-void shESPFSinit::setLogOnState(bool _on, Print *_serial)
+void shESPFSinit::setSerialObject(Print *_serial)
+{
+  if (_serial)
+  {
+    serial = _serial;
+  }
+}
+
+void shESPFSinit::setLogOnState(bool _on)
 {
   logOnState = _on;
-  serial = (logOnState) ? _serial : NULL;
 }
 
 bool shESPFSinit::getLogOnState() { return logOnState; }
